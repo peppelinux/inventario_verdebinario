@@ -2,9 +2,6 @@ from django.db import models
 from museo.models import Produttore
 from django.contrib.auth.models import User
 
-# generare qr code
-from elaphe import barcode
-from settings import BARCODE_PATH, MEDIA_ROOT, SEP, BARCODE_URL, BARCODE_EXTENSION
 from os import chdir, mkdir
 
 class Donatore(models.Model):
