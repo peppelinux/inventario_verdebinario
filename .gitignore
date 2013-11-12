@@ -2,3 +2,7 @@
 *.pot
 *.pyc
 local_settings.py
+.save
+
+verdebinario.db # Sqlite Local
+.idea # JetBrains Projects
