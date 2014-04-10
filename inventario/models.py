@@ -5,8 +5,10 @@ from django.templatetags.static import static
 from django.conf import settings
 import qrcode
 
-from os import chdir, mkdir
+from os import chdir, makedirs
 
+barcodeinvdir = settings.MEDIA_ROOT + 'inventario/barcode/'
+barcodeinvurl = settings.MEDIA_URL + 'inventario/barcode/'
 
 class Donatore(models.Model):
     id_tabella = models.AutoField(primary_key=True)
@@ -55,7 +57,7 @@ class Inventario(models.Model):
     )
     id_tabella = models.AutoField(primary_key=True)
     modello = models.CharField(max_length=135, blank=True)
-    seriale = models.CharField(unique=True, max_length=254, blank=True)
+    seriale = models.CharField(unique=True, max_length=254, blank=True, null=True)
     #seriale_slug = models.SlugField(max_length=254, blank=True)
     data_inserimento = models.DateField(null=True, blank=False, auto_now_add=True)
     donatore = models.ForeignKey(Donatore, null=True, blank=True, on_delete=models.SET_NULL)
@@ -92,36 +94,40 @@ class Inventario(models.Model):
         """ % (str(self.modello), str(self.produttore), str(self.tipologia), str(self.seriale), str(self.stato), str(donatore))
 
         try:
-            chdir(settings.MEDIA_ROOT + 'barcode')
+            chdir(barcodeinvdir)
         except:
-            mkdir(settings.MEDIA_ROOT + 'barcode')
-            chdir(settings.MEDIA_ROOT + 'barcode')
+            makedirs(barcodeinvdir)
+            chdir(barcodeinvdir)
 
         img = qrcode.make(msg)
-        img.save(settings.MEDIA_ROOT + 'barcode/' + str(self.pk)+ '.png')
+        img.save(barcodeinvdir + str(self.pk) + '.png')
 
 
     def get_barcode_url(self):
-        img_url_path =  settings.MEDIA_URL + 'barcode/' + str(self.pk)+ '.png'
+        img_url_path =  barcodeinvurl + str(self.pk)+ '.png'
         return '<a target="_blank" href="%s"><img width=53 src="%s"></a>' % (img_url_path, img_url_path)
     get_barcode_url.allow_tags = True
     get_barcode_url.short_description = 'QRCode'
 
     def save(self, *args, **kwargs):
-        try:
-            self.do_barcode()
-        except Exception as e:
-            raise e
-        if not self.etichetta_verde:
-            try:
-                self.etichetta_verde = 'vb %d' % self.pk
-            except:
-                pass
         if not self.seriale or self.seriale == '':
             self.seriale = None
         if not self.stato:
             self.stato = self.STATO[0][0]
         super(Inventario, self).save(*args, **kwargs)
+
+        guestwho = self.pk
+        while not self.etichetta_verde or self.etichetta_verde == '':
+            try:
+                self.etichetta_verde = 'vb %d' % self.pk
+                self.save()
+            except:
+                guestwho = guestwho + 1
+
+        try:
+            self.do_barcode()
+        except Exception as e:
+            raise e
 
     def get_google_search(self):
         return ('<a target="_blank" href="http://www.google.it/search?q=%s+%s"> <img width=53 src="' + static('images/search.png') + '" /> </a>') % ('+'.join(self.produttore.__str__().split(' ')), '+'.join(self.modello.split(' ') ) )
