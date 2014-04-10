@@ -1,6 +1,7 @@
 from django.db import models
 from museo.models import Produttore
 from django.contrib.auth.models import User
+from django.templatetags.static import static
 
 from os import chdir, mkdir
 
@@ -17,7 +18,7 @@ class Donatore(models.Model):
         verbose_name_plural = "Donatore"
         ordering = ['nominativo']
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s' % (self.nominativo)
 
 
@@ -31,7 +32,7 @@ class TipologiaHardware(models.Model):
         verbose_name_plural = "Tipologia Hardware"
         ordering = ['nome']
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s' % self.nome
 
 
@@ -71,7 +72,7 @@ class Inventario(models.Model):
         db_table = 'inventario'
         verbose_name_plural = "Gestione Inventario"
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s - SN: %s' % (self.modello, self.seriale)
 
     def do_barcode(self):
@@ -128,7 +129,7 @@ data_mode='8bits')
     '''
 
     def get_google_search(self):
-        return '<a target="_blank" href="http://www.google.it/search?q=%s+%s"> <img width=53 src="/media/images/search.png" /> </a>' % ('+'.join(self.produttore.__str__().split(' ')), '+'.join(self.modello.split(' ') ) )
+        return ('<a target="_blank" href="http://www.google.it/search?q=%s+%s"> <img width=53 src="' + static('images/search.png') + '" /> </a>') % ('+'.join(self.produttore.__str__().split(' ')), '+'.join(self.modello.split(' ') ) )
     get_google_search.allow_tags = True
     get_google_search.short_description = 'google'
 

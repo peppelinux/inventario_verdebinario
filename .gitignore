@@ -7,3 +7,5 @@ venv/
 verdebinario.db # Sqlite Local
 .idea # JetBrains Projects
 db.sqlite3
+media/*
+vbsysinf/settings.py

@@ -28,7 +28,7 @@ class Produttore(ImageModel):
     def get_absolute_url(self):
         return '%s' % (self.url)
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s' % (self.nome_abbreviato)
 
 
@@ -69,7 +69,7 @@ class FotoHardwareMuseo(ImageModel):
         db_table = 'foto_hardware_museo'
         verbose_name_plural = "Foto Hardware Museo"
 
-    def __unicode__(self):
+    def __str__(self):
         return '%s %s' % (self.seriale, self.scheda_tecnica)
 
     def get_absolute_url(self):
