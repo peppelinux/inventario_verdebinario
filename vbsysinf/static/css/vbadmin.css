@@ -1,0 +1,12 @@
+
+#header {
+    background-color: #234F32;
+}
+
+.module h2, .module caption, .inline-group h2 {
+    background: url(../images/default-bg.png);
+}
+
+a:link, a:visited{ color: #496d23;}
+
+a:hover {color: #739a48;}
