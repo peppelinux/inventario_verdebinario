@@ -1,0 +1,4 @@
+Django==1.6.2
+Pillow==2.4.0
+South==0.8.4
+django-photologue==2.7
