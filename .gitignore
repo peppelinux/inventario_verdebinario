@@ -3,6 +3,6 @@
 *.pyc
 local_settings.py
 .save
-
+venv/
 verdebinario.db # Sqlite Local
 .idea # JetBrains Projects

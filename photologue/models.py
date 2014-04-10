@@ -2,6 +2,7 @@ import os
 import random
 import shutil
 import zipfile
+import collections
 
 from datetime import datetime, date
 from inspect import isclass
@@ -34,9 +35,8 @@ except ImportError:
 # attempt to load the django-tagging TagField from default location,
 # otherwise we substitude a dummy TagField.
 
-from utils import EXIF
-from utils.reflection import add_reflection
-from utils.watermark import apply_watermark
+from .utils.reflection import add_reflection
+from .utils.watermark import apply_watermark
 
 # Path to sample image
 SAMPLE_IMAGE_PATH = getattr(settings, 'SAMPLE_IMAGE_PATH', os.path.join(os.path.dirname(__file__), 'res', 'sample.jpg')) # os.path.join(settings.PROJECT_PATH, 'photologue', 'res', 'sample.jpg'
@@ -50,7 +50,7 @@ PHOTO_DIR = getattr(settings, 'PHOTO_DIR', 'photo')
 # Look for user function to define file paths
 PHOTO_PATH = getattr(settings, 'PHOTO_PATH', None)
 if PHOTO_PATH is not None:
-    if callable(PHOTO_PATH):
+    if isinstance(PHOTO_PATH, collections.Callable):
         get_storage_path = PHOTO_PATH
     else:
         parts = PHOTO_PATH.split('.')
@@ -113,13 +113,15 @@ class ImageModel(models.Model):
 
     @property
     def EXIF(self):
+        '''
         try:
             return EXIF.process_file(open(self.image.path, 'rb'))
         except:
             try:
                 return EXIF.process_file(open(self.image.path, 'rb'), details=False)
             except:
-                return {}
+        '''
+        return {}
 
     def admin_thumbnail(self):
         func = getattr(self, 'get_admin_thumbnail_url', None)
@@ -127,14 +129,13 @@ class ImageModel(models.Model):
             return _('An "admin_thumbnail" photo size has not been defined.')
         else:
             if hasattr(self, 'get_absolute_url'):
-                return u'<a target="_blank" href="%s"><img src="%s"></a>' % \
+                return '<a target="_blank" href="%s"><img src="%s"></a>' % \
                     (self.get_absolute_url(), func())
-            else:
-                return u'<a target="_blank"  href="%s"><img src="%s"></a>' % \
+                return '<a target="_blank"  href="%s"><img src="%s"></a>' % \
                     (self.image.url, func())
     admin_thumbnail.short_description = _('Thumbnail')
     admin_thumbnail.allow_tags = True
-    
+
     def cache_path(self):
         return os.path.join(os.path.dirname(self.image.path), "cache")
 
@@ -170,7 +171,7 @@ class ImageModel(models.Model):
                             self._get_filename_for_size(photosize.name))
 
     def add_accessor_methods(self, *args, **kwargs):
-        for size in PhotoSizeCache().sizes.keys():
+        for size in list(PhotoSizeCache().sizes.keys()):
             setattr(self, 'get_%s_size' % size,
                     curry(self._get_SIZE_size, size=size))
             setattr(self, 'get_%s_photosize' % size,
@@ -251,7 +252,7 @@ class ImageModel(models.Model):
                 except KeyError:
                     pass
             im.save(im_filename, 'JPEG', quality=int(photosize.quality), optimize=True)
-        except IOError, e:
+        except IOError as e:
             if os.path.isfile(im_filename):
                 os.unlink(im_filename)
             raise e
@@ -267,13 +268,13 @@ class ImageModel(models.Model):
 
     def clear_cache(self):
         cache = PhotoSizeCache()
-        for photosize in cache.sizes.values():
+        for photosize in list(cache.sizes.values()):
             self.remove_size(photosize, False)
         self.remove_cache_dirs()
 
     def pre_cache(self):
         cache = PhotoSizeCache()
-        for photosize in cache.sizes.values():
+        for photosize in list(cache.sizes.values()):
             if photosize.pre_cache:
                 self.create_size(photosize)
 
