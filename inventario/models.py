@@ -2,6 +2,8 @@ from django.db import models
 from museo.models import Produttore
 from django.contrib.auth.models import User
 from django.templatetags.static import static
+from django.conf import settings
+import qrcode
 
 from os import chdir, mkdir
 
@@ -76,8 +78,6 @@ class Inventario(models.Model):
         return '%s - SN: %s' % (self.modello, self.seriale)
 
     def do_barcode(self):
-        pass
-    '''
         try:
             donatore = self.donatore.nominativo
         except:
@@ -89,33 +89,29 @@ class Inventario(models.Model):
         SN: %s
         Stato: %s
         Donatore: %s
-        """ % (str(self.modello), str(self.produttore), str(self.tipologia), str(self.seriale),
-str(self.stato), str(self.donatore))
+        """ % (str(self.modello), str(self.produttore), str(self.tipologia), str(self.seriale), str(self.stato), str(donatore))
 
         try:
-            chdir(BARCODE_PATH)
+            chdir(settings.MEDIA_ROOT + 'barcode')
         except:
-            mkdir(BARCODE_PATH); chdir(BARCODE_PATH)
+            mkdir(settings.MEDIA_ROOT + 'barcode')
+            chdir(settings.MEDIA_ROOT + 'barcode')
 
-        b = barcode('qrcode', msg[:174], options=dict(version=9, eclevel='M'), margin=10,
-data_mode='8bits')
-        b.save(str(self.id_tabella)+BARCODE_EXTENSION)
-    '''
+        img = qrcode.make(msg)
+        img.save(settings.MEDIA_ROOT + 'barcode/' + str(self.pk)+ '.png')
+
 
     def get_barcode_url(self):
-        pass
-    '''
-        img_url_path = BARCODE_URL+ SEP + str(self.pk)+ BARCODE_EXTENSION
-        return u'<a target="_blank" href="%s"><img width=53 src="%s"></a>' % (img_url_path, img_url_path)
+        img_url_path =  settings.MEDIA_URL + 'barcode/' + str(self.pk)+ '.png'
+        return '<a target="_blank" href="%s"><img width=53 src="%s"></a>' % (img_url_path, img_url_path)
     get_barcode_url.allow_tags = True
     get_barcode_url.short_description = 'QRCode'
 
     def save(self, *args, **kwargs):
-        super(Inventario, self).save(*args, **kwargs)
         try:
             self.do_barcode()
-        except:
-            pass
+        except Exception as e:
+            raise e
         if not self.etichetta_verde:
             try:
                 self.etichetta_verde = 'vb %d' % self.pk
@@ -126,7 +122,6 @@ data_mode='8bits')
         if not self.stato:
             self.stato = self.STATO[0][0]
         super(Inventario, self).save(*args, **kwargs)
-    '''
 
     def get_google_search(self):
         return ('<a target="_blank" href="http://www.google.it/search?q=%s+%s"> <img width=53 src="' + static('images/search.png') + '" /> </a>') % ('+'.join(self.produttore.__str__().split(' ')), '+'.join(self.modello.split(' ') ) )

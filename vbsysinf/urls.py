@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, include, url
-#from .settings import MEDIA_ROOT
 from django.views.generic.base import RedirectView
+from django.conf import settings
+from django.conf.urls.static import static
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -21,5 +22,8 @@ urlpatterns = patterns('',
 
 
 )
+
+if settings.DEBUG:
+    urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
