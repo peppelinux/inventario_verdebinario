@@ -25,8 +25,8 @@ class Produttore(ImageModel):
         db_table = 'produttore'
         verbose_name_plural = "Produttore"
 
-    def get_absolute_url(self):
-        return '%s' % (self.url)
+#    def get_absolute_url(self):
+#        return '%s' % (self.url)
 
     def __str__(self):
         return '%s' % (self.nome_abbreviato)
