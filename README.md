@@ -39,5 +39,5 @@ Django based web system used to register Verde Binario's items.
 
 * 0.1 2013-07-18:
     * initial commit
-    * qr-code is disabled, we are looking for a lib well manteined 
+    * qr-code is disabled, we are looking for a well manteined lib 
     * fixed git author name...    
