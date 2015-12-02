@@ -1,0 +1,9 @@
+Django==1.6.2
+Pillow==2.4.0
+South==0.8.4
+barcode==0.5.0
+django-photologue==2.7
+python-Levenshtein==0.11.2
+qrcode==4.0.4
+reportlab==3.0
+six==1.6.1
